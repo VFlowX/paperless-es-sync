@@ -4,9 +4,10 @@ import https from 'https';
 import express from 'express';
 
 import postgreRouter from "@routes/postgre";
-import importRouter from "@routes/importXlsx";
 import { ensureDir } from 'fs-extra';
 import { logger } from '@services/logger';
+import { watchDocumentPaperless } from '@services/pgsql_replication';
+import { startWatchMongo } from '@services/mongodb_watcher';
 
 
 https.globalAgent.options.rejectUnauthorized = false;
@@ -30,10 +31,12 @@ app.use((err: any, _req: any, res: any, _next: any) => {
   });
 });
 ensureDir('./logs/')
-ensureDir('./uploads/xlsx/')
-ensureDir('./uploads/tepdinhkem/')
-app.use('/import', importRouter)
+// ensureDir('./uploads/xlsx/')
+// ensureDir('./uploads/tepdinhkem/')
 app.use('/postgre', postgreRouter)
+
+watchDocumentPaperless()
+startWatchMongo()
 app.listen(9000, async () => {
-  logger.info("Server is up! http://0.0.0.0:9000");
+  logger('startup').info("Server is up! http://0.0.0.0:9000");
 })
